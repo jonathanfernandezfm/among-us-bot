@@ -57,19 +57,6 @@ bot.on("message", async (msg) => {
 							});
 						});
 				});
-			} else {
-				const error = new Discord.MessageEmbed()
-					.setColor("##fc2003")
-					.setTitle("❌ Sólo mensajes de códigos");
-
-				msg.channel
-					.send(error)
-					.then((message) => {
-						setTimeout(() => message.delete(), 3000);
-					})
-					.catch((err) => {
-						console.log("editErrorEmbed error", err);
-					});
 			}
 		}
 	}
