@@ -22,7 +22,6 @@ bot.on("message", async (msg) => {
 	if (msg.channel.id === "750810774548512869") {
 		let values = msg.content.split(" ");
 
-		console.log(values);
 		for (let i = 0; i < values.length; i++) {
 			if (values.length === 1 && values[i].length === 4 && !/\d/.test(values[i])) {
 				const exampleEmbed = new Discord.MessageEmbed()
@@ -58,10 +57,20 @@ bot.on("message", async (msg) => {
 							});
 						});
 				});
+			} else {
+				const error = new Discord.MessageEmbed()
+					.setColor("##fc2003")
+					.setTitle("❌ Sólo mensajes de códigos");
+
+				msg.channel
+					.send(error)
+					.then((message) => {
+						setTimeout(() => message.delete(), 3000);
+					})
+					.catch((err) => {
+						console.log("editErrorEmbed error", err);
+					});
 			}
-		}
-		const code = msg.content.split(" ")[1];
-		if (code && code.length === 4) {
 		}
 	}
 
