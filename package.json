@@ -1,0 +1,16 @@
+{
+    "name": "among-us-comunidad",
+    "version": "1.0.0",
+    "description": "BOT para la comunidad de Among Us",
+    "main": "bot.js",
+    "author": "Jonathan 'Poak' Fernandez",
+    "scripts": {
+        "start": "node ./bot.js",
+        "dev": "nodemon ./bot.js"
+    },
+    "dependencies": {
+        "discord.js": "^12.3.1",
+        "nodemon": "^2.0.4",
+        "winston": "^3.3.3"
+    }
+}
