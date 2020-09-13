@@ -12,10 +12,7 @@ bot.on("ready", (evt) => {
 });
 
 bot.on("guildMemberAdd", (member) => {
-	const channel = member.guild.channels.cache.find((ch) => ch.name === "member-log");
-	if (!channel) return;
-
-	channel.send(`Bienvenido al servidor, ${member}`);
+	member.roles.add("750841875489095791");
 });
 
 bot.on("message", async (msg) => {
@@ -75,10 +72,10 @@ bot.on("message", async (msg) => {
 	// 	}
 	// }
 
-	// if(msg.content.includes("clearChannel")){
-	//     const fetched = await msg.channel.messages.fetch({limit: 100});
-	//     msg.channel.bulkDelete(fetched);
-	// }
+	if (msg.content.includes("clearChannel") && msg.author.id === "754834672982294639") {
+		const fetched = await msg.channel.messages.fetch({ limit: 100 });
+		msg.channel.bulkDelete(fetched);
+	}
 
 	// if (msg.content.includes("createEmbed")) {
 	// 	// if (msg.content.includes("mute")) {
