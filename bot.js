@@ -72,7 +72,10 @@ bot.on("message", async (msg) => {
 	// 	}
 	// }
 
-	if (msg.content.includes("clearChannel") && msg.author.id === "754834672982294639") {
+	if (
+		msg.content.includes("clearChannel") &&
+		msg.member._roles.find((role) => role === "754834672982294639")
+	) {
 		const fetched = await msg.channel.messages.fetch({ limit: 100 });
 		msg.channel.bulkDelete(fetched);
 	}
