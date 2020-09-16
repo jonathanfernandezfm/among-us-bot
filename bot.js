@@ -62,7 +62,10 @@ bot.on("message", async (msg) => {
 				});
 			});
 		} else {
-			if (msg.author.id !== "751121479449706556") {
+			if (
+				msg.author.id !== "751121479449706556" &&
+				!msg.member._roles.find((role) => role === "750841836058312805")
+			) {
 				msg.delete();
 				const embed = new Discord.MessageEmbed()
 					.setColor("#fc2003")
