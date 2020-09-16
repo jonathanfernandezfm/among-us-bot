@@ -17,43 +17,65 @@ bot.on("guildMemberAdd", (member) => {
 
 bot.on("message", async (msg) => {
 	if (msg.channel.id === "750810774548512869") {
-		let values = msg.content.split(" ");
+		let value = msg.content.split(" ")[0];
 
-		for (let i = 0; i < values.length; i++) {
-			if (values.length === 1 && values[i].length === 4 && !/\d/.test(values[i])) {
-				const exampleEmbed = new Discord.MessageEmbed()
-					.setColor("#00ba19")
-					.setTitle("🚀  " + values[i].toUpperCase());
+		if (value.length === 6 && !/\d/.test(value)) {
+			const exampleEmbed = new Discord.MessageEmbed()
+				.setColor("#00ba19")
+				.setTitle("🚀 " + value.toUpperCase())
+				.setDescription("Creada por " + msg.author.toString())
+				.setTimestamp();
 
-				const filter = (reaction, reaction_user) => {
-					return reaction.emoji.name === "❌" && msg.author.id === reaction_user.id;
-				};
+			const filter = (reaction, reaction_user) => {
+				return true; //return reaction.emoji.name === "❌" && msg.author.id === reaction_user.id;
+			};
 
-				msg.delete();
-				msg.channel.send(exampleEmbed).then(async (message_sended) => {
-					await message_sended.react("❌");
+			msg.delete();
+			msg.channel.send(exampleEmbed).then(async (message_sended) => {
+				await message_sended.react("❌");
 
-					message_sended
-						.awaitReactions(filter, { max: 1, time: 20000, errors: ["time"] })
-						.then((collection) => {
-							collection.map((message_reaction) => {
-								if (message_reaction.emoji.name === "❌") {
-									const embed = new Discord.MessageEmbed()
-										.setColor("#fc2003")
-										.setTitle("❌ Game cancelado");
+				const collector = message_sended.createReactionCollector(filter, {});
 
-									message_sended
-										.edit(embed)
-										.then((message) => {
-											setTimeout(() => message.delete(), 3000);
-										})
-										.catch((err) => {
-											console.log("editErrorEmbed error", err);
-										});
-								}
+				collector.on("collect", (reaction, user) => {
+					if (reaction.emoji.name === "❌") {
+						const embed = new Discord.MessageEmbed()
+							.setColor("#fc2003")
+							.setTitle("❌ Game cancelado");
+
+						message_sended
+							.edit(embed)
+							.then((message) => {
+								setTimeout(() => message.delete(), 3000);
+							})
+							.catch((err) => {
+								console.log("editErrorEmbed error", err);
 							});
-						});
+					} else {
+						setTimeout(() => {
+							reaction.users.remove(user.id);
+						}, 2000);
+					}
 				});
+
+				collector.on("end", (collected) => {
+					console.log(`Cancelled game. Collected ${collected.size} items`);
+				});
+			});
+		} else {
+			if (msg.author.id !== "751121479449706556") {
+				msg.delete();
+				const embed = new Discord.MessageEmbed()
+					.setColor("#fc2003")
+					.setTitle("🙏🏼 Solo códigos");
+
+				msg.channel
+					.send(embed)
+					.then((msg_sended_embed) => {
+						setTimeout(() => msg_sended_embed.delete(), 2000);
+					})
+					.catch((msg_sended_embed) => {
+						msg_sended_embed.delete();
+					});
 			}
 		}
 	}
