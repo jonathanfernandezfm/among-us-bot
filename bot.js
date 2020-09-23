@@ -23,7 +23,9 @@ bot.on("ready", (evt) => {
 });
 
 bot.on("guildMemberAdd", (member) => {
-	member.roles.add("750841875489095791");
+	member.roles
+		.add("750841875489095791")
+		.catch((err) => console.log("Error añadiendo rol -> " + err));
 });
 
 bot.on("message", async (msg) => {
@@ -198,7 +200,8 @@ bot.on("voiceStateUpdate", (oldState, newState) => {
 	if (
 		oldState.channel !== null &&
 		oldState.channel.name.includes("🚀 Partida ") &&
-		oldState.channel.members.size !== 0
+		oldState.channel.members.size !== 0 &&
+		oldState.channelID !== newState.channelID
 	) {
 		let partida_number = oldState.channel.name.replace("🚀 Partida ", "");
 
