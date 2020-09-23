@@ -9,6 +9,17 @@ bot.login(auth.Token);
 
 bot.on("ready", (evt) => {
 	console.log("Bot online!");
+	bot.channels.cache.forEach((channel) => {
+		if (channel.name.includes("🚀 Partida ") && channel.members.size === 0) {
+			let partida_number = channel.name.replace("🚀 Partida ", "");
+			let channel_text = bot.channels.cache.find(
+				(ch) => ch.name === "💬chat-partida-" + partida_number
+			);
+			console.log("Limpiando canales -> " + channel.name);
+			channel_text.delete();
+			channel.delete();
+		}
+	});
 });
 
 bot.on("guildMemberAdd", (member) => {
@@ -16,15 +27,36 @@ bot.on("guildMemberAdd", (member) => {
 });
 
 bot.on("message", async (msg) => {
-	if (msg.channel.id === "750810774548512869") {
+	if (msg.channel.id === "758340770331099157" || msg.channel.id === "752621705440264242") {
 		let value = msg.content.split(" ")[0];
 
+		let voice_channel = msg.guild.members.resolve(msg.author.id).voice.channel;
 		if (value.length === 6 && !/\d/.test(value)) {
+			if (!voice_channel) {
+				msg.delete();
+				const embed = new Discord.MessageEmbed()
+					.setColor("#fc2003")
+					.setTitle("🙏🏼 Crea un canal de voz para tu partida.");
+
+				msg.channel
+					.send(embed)
+					.then((msg_sended_embed) => {
+						setTimeout(() => msg_sended_embed.delete(), 2000);
+					})
+					.catch((msg_sended_embed) => {
+						msg_sended_embed.delete();
+					});
+
+				return;
+			}
+
 			const exampleEmbed = new Discord.MessageEmbed()
 				.setColor("#00ba19")
 				.setTitle("🚀 " + value.toUpperCase())
-				.setDescription("Creada por " + msg.author.toString())
-				.setTimestamp();
+				.setDescription("Sala: " + voice_channel.name)
+				// .addFields([{ name: "Partida", value: voice_channel.name }])
+				.setTimestamp()
+				.setFooter("Creada por " + msg.author.tag);
 
 			const filter = (reaction, reaction_user) => {
 				return true; //return reaction.emoji.name === "❌" && msg.author.id === reaction_user.id;
@@ -83,20 +115,6 @@ bot.on("message", async (msg) => {
 		}
 	}
 
-	// if (msg.content.includes("mute")) {
-	// 	let channel = msg.member.voice.channel;
-	// 	for (let member of channel.members) {
-	// 		member[1].edit({ mute: true });
-	// 	}
-	// }
-
-	// if (msg.content.includes("unmute")) {
-	// 	let channel = msg.member.voice.channel;
-	// 	for (let member of channel.members) {
-	// 		member[1].edit({ mute: false });
-	// 	}
-	// }
-
 	if (
 		msg.content.includes("clearChannel") &&
 		msg.member._roles.find((role) => role === "754834672982294639")
@@ -104,65 +122,95 @@ bot.on("message", async (msg) => {
 		const fetched = await msg.channel.messages.fetch({ limit: 100 });
 		msg.channel.bulkDelete(fetched);
 	}
-
-	// if (msg.content.includes("createEmbed")) {
-	// 	// if (msg.content.includes("mute")) {
-	// 		// const filter = (reaction, user) =>
-	// 		// 	["🔈", "🔇"].includes(reaction.emoji.name) && user.id === msg.author.id;
-
-	// 		const exampleEmbed = new Discord.MessageEmbed()
-	// 			.setColor("#fcb603")
-	// 			.setTitle("Mute panel")
-	// 			.setTimestamp();
-
-	//         msg.delete();
-
-	//         const filter = (reaction, user) => {
-	//             console.log(user, msg.author);
-	//             return reaction.emoji.name === '👍' && user.id === msg.author.id;
-	//         };
-
-	// 		msg.channel.send(exampleEmbed).then((embed) => {
-	// 			embed.react("🔈");
-	//             embed.react("🔇");
-	//             console.log(embed.id, embed.channel);
-
-	// 			embed
-	// 				.awaitReactions(filter, { })
-	// 				.then((collected) => {
-	// 					const reation = collected.first();
-	//                     console.log('tesdt');
-	// 					if (reaction.emoji.name === "🔈") console.log("🔈");
-	// 					if (reaction.emoji.name === "🔇") console.log("🔇");
-	// 				})
-	// 				.catch((collected) => {
-	// 					message.reply("you reacted with neither a thumbs up, nor a thumbs down.");
-	// 				});
-	// 		});
-	// 	// }
-	// }
 });
 
-bot.on("messageReactionAdd", async (reaction, user) => {
-	// if (reaction.partial) {
-	// 	try {
-	// 		await reaction.fetch();
-	// 	} catch (error) {
-	// 		console.log("Something went wrong when fetching the message: ", error);
-	// 		return;
-	// 	}
-	// }
-	// if (reaction.message.id === "751173045716254819") {
-	// 	if (reaction.emoji.name === "🔈") {
-	// 		let channel = reaction.users;
-	// 		for (let member of channel.members) {
-	// 			member[1].edit({ mute: true });
-	// 		}
-	// 	}
-	// 	if (reaction.emoji.name === "🔇") {
-	// 	}
-	// }
-	// console.log(`${reaction.message.author}'s message "${reaction.message.content}" gained a reaction!`);
-	// console.log(`${reaction.count} user(s) have given the same reaction to this message!`);
-	// console.log(reaction.emoji.name === "🔈");
+bot.on("voiceStateUpdate", (oldState, newState) => {
+	if (newState.channelID === "758340869500960839") {
+		let contador = 1;
+
+		newState.guild.channels.cache.forEach((channel) => {
+			if (channel.name.includes("🚀 Partida ")) contador += 1;
+		});
+
+		newState.guild.channels
+			.create("🚀 Partida " + contador, {
+				type: "voice",
+				parent: "758340792426692628",
+				permissionOverwrites: [],
+				position: 40,
+				reason: "Nuevo canal para partida",
+			})
+			.then((channel) => {
+				newState.member.voice
+					.setChannel(channel.id)
+					.catch((err) => console.log("Error moviendo usuario -> " + err));
+
+				newState.guild.channels
+					.create("💬Chat partida " + contador, {
+						type: "text",
+						parent: "758341343826935898",
+						permissionOverwrites: [
+							{ id: newState.guild.id, deny: ["VIEW_CHANNEL"] },
+							{ id: newState.member.id, allow: ["VIEW_CHANNEL"] },
+						],
+						position: 40,
+						reason: "Nuevo canal de texto privado para partida",
+					})
+					.catch((err) => console.log("Error creando chat de texto privado -> " + err));
+			})
+			.catch((err) => {
+				console.log(err);
+			});
+	}
+
+	if (
+		oldState.channel !== null &&
+		oldState.channel.name.includes("🚀 Partida ") &&
+		oldState.channel.members.size === 0
+	) {
+		oldState.channel
+			.delete()
+			.catch((err) => console.log("Error eliminando canal vacio -> " + err));
+
+		let partida_number = oldState.channel.name.replace("🚀 Partida ", "");
+		oldState.guild.channels.cache.forEach((channel) => {
+			if (channel.name === "💬chat-partida-" + partida_number) {
+				channel.delete();
+			}
+		});
+	}
+
+	if (newState.channel !== null && newState.channel.name.includes("🚀 Partida ")) {
+		let partida_number = newState.channel.name.replace("🚀 Partida ", "");
+
+		let channel_text = newState.guild.channels.cache.find(
+			(ch) => ch.name === "💬chat-partida-" + partida_number
+		);
+
+		if (channel_text) {
+			channel_text.updateOverwrite(newState.member.id, {
+				SEND_MESSAGES: true,
+				VIEW_CHANNEL: true,
+			});
+		}
+	}
+
+	if (
+		oldState.channel !== null &&
+		oldState.channel.name.includes("🚀 Partida ") &&
+		oldState.channel.members.size !== 0
+	) {
+		let partida_number = oldState.channel.name.replace("🚀 Partida ", "");
+
+		let channel_text = oldState.guild.channels.cache.find(
+			(ch) => ch.name === "💬chat-partida-" + partida_number
+		);
+
+		if (channel_text) {
+			channel_text.updateOverwrite(newState.member.id, {
+				SEND_MESSAGES: false,
+				VIEW_CHANNEL: false,
+			});
+		}
+	}
 });
